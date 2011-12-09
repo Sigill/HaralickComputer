@@ -1,12 +1,10 @@
 package HaralickComputer.views;
 
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -15,67 +13,36 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 
 import HaralickComputer.controllers.TextureFeaturesComputer;
+import HaralickComputer.core.DoubleImagePanel;
 import HaralickComputer.core.TextureFeatures;
 
 public class Display extends JFrame implements ActionListener, ComponentListener {
 	private static final long serialVersionUID = 4923476327038677535L;
 	
-	JPanel panel;
-	BufferedImage leftImage, rightImage;
+	DoubleImagePanel panel;
 	JMenuItem menuItemOpen, 
 		menuItemDisplayEnergy, menuItemDisplayEntropy, 
 		menuItemDisplayCorrelation, menuItemDisplayInverseDifferenceMoment, 
 		menuItemDisplayInertia, menuItemDisplayClusterShade, 
-		menuItemDisplayClusterProminence, menuItemDisplayHaralickCorrelation;
+		menuItemDisplayClusterProminence, menuItemDisplayHaralickCorrelation,
+		menuSwitchDisplay;
 	
 	JFileChooser fc;
 	TextureFeaturesComputer tfc = new TextureFeaturesComputer();
 	
 	public Display() {
-		super("HaralickDisplay");
+		super("HaralickComputer");
 		setMinimumSize(new Dimension(300, 200));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addComponentListener(this);
 		
-		leftImage = null;
-		rightImage = null;
 		fc = new JFileChooser();
 		
 		setJMenuBar(buildMenuBar());
 		
-		panel = new JPanel() {
-			private static final long serialVersionUID = 7680070290567701814L;
-
-			public void paintComponent(Graphics g) {
-				if(leftImage != null) {
-					Dimension d = getSize();
-					int imageWidth, imageHeight, xOffset, yOffset;
-					float containerRatio = (float) (d.height/(float)(d.width / 2.0));
-					float imageRatio = leftImage.getHeight()/(float)leftImage.getWidth();
-					float scale;
-				
-					if(containerRatio > imageRatio) {
-						scale = (float) ((d.width/2.0) / (float)leftImage.getWidth());
-					} else {
-						scale = d.height / (float)leftImage.getHeight();
-					}
-					imageWidth = (int)(leftImage.getWidth() * scale);
-					imageHeight = (int)(leftImage.getHeight() * scale);
-					
-					xOffset = (int) ((d.width - 2 * imageWidth) / 3.0);
-					yOffset = (d.height - imageHeight) / 2;
-					
-					g.drawImage(leftImage, xOffset, yOffset, imageWidth, imageHeight, null);
-					
-					if(rightImage != null) {
-						g.drawImage(rightImage, 2 * xOffset + imageWidth, yOffset, imageWidth, imageHeight, null);
-					}
-				}
-			}
-		};
+		panel = new DoubleImagePanel();
 		setContentPane(panel);
 
 		pack();
@@ -123,6 +90,12 @@ public class Display extends JFrame implements ActionListener, ComponentListener
 		menuItemDisplayClusterProminence.addActionListener(this);
 		menuItemDisplayHaralickCorrelation.addActionListener(this);
 		
+		menuDisplay.addSeparator();
+		
+		menuSwitchDisplay = new JMenuItem("Switch display");
+		menuDisplay.add(menuSwitchDisplay);
+		menuSwitchDisplay.addActionListener(this);
+		
 		return menubar;
 	}
 
@@ -133,31 +106,33 @@ public class Display extends JFrame implements ActionListener, ComponentListener
 		if(source == menuItemOpen) {
 			if(fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				try {
-					leftImage = null;
-					rightImage = null;
+					panel.setLeftImage(null);
+					panel.setRightImage(null);
 					tfc.setImageSource(ImageIO.read(fc.getSelectedFile()));
 					tfc.compute();
-					leftImage = tfc.getSourceImage();
+					panel.setLeftImage(tfc.getSourceImage());
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
 			}
 		} else if(source == menuItemDisplayEnergy) {
-			rightImage = tfc.getHaralickImage(TextureFeatures.Energy);
+			panel.setRightImage(tfc.getHaralickImage(TextureFeatures.Energy));
 		} else if(source == menuItemDisplayEntropy) {
-			rightImage = tfc.getHaralickImage(TextureFeatures.Entropy);
+			panel.setRightImage(tfc.getHaralickImage(TextureFeatures.Entropy));
 		} else if(source == menuItemDisplayCorrelation) {
-			rightImage = tfc.getHaralickImage(TextureFeatures.Correlation);
+			panel.setRightImage(tfc.getHaralickImage(TextureFeatures.Correlation));
 		} else if(source == menuItemDisplayInverseDifferenceMoment) {
-			rightImage = tfc.getHaralickImage(TextureFeatures.InverseDifferenceMoment);
+			panel.setRightImage(tfc.getHaralickImage(TextureFeatures.InverseDifferenceMoment));
 		} else if(source == menuItemDisplayInertia) {
-			rightImage = tfc.getHaralickImage(TextureFeatures.Inertia);
+			panel.setRightImage(tfc.getHaralickImage(TextureFeatures.Inertia));
 		} else if(source == menuItemDisplayClusterShade) {
-			rightImage = tfc.getHaralickImage(TextureFeatures.ClusterShade);
+			panel.setRightImage(tfc.getHaralickImage(TextureFeatures.ClusterShade));
 		} else if(source == menuItemDisplayClusterProminence) {
-			rightImage = tfc.getHaralickImage(TextureFeatures.ClusterProminence);
+			panel.setRightImage(tfc.getHaralickImage(TextureFeatures.ClusterProminence));
 		} else if(source == menuItemDisplayHaralickCorrelation) {
-			rightImage = tfc.getHaralickImage(TextureFeatures.HaralickCorrelation);
+			panel.setRightImage(tfc.getHaralickImage(TextureFeatures.HaralickCorrelation));
+		} else if(source == menuSwitchDisplay) {
+			panel.changeDirection();
 		}
 		update(getGraphics());
 	}
