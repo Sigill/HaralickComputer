@@ -12,7 +12,7 @@ public class DoubleImagePanel extends JPanel {
 	public enum Orientation { Horizontal, Vertical };
 	
 	private BufferedImage leftImage = null, rightImage = null;
-	private Orientation direction = Orientation.Horizontal;
+	private Orientation orientation = Orientation.Horizontal;
 	
 	public void setLeftImage(BufferedImage img) {
 		this.leftImage = img;
@@ -22,19 +22,19 @@ public class DoubleImagePanel extends JPanel {
 		this.rightImage = img;
 	}
 	
-	public Orientation getDirection() {
-		return this.direction;
+	public Orientation getOrientation() {
+		return this.orientation;
 	}
 	
-	public void setDirection(Orientation dir) {
-		this.direction = dir;
+	public void setOrientation(Orientation dir) {
+		this.orientation = dir;
 	}
 	
-	public void changeDirection() {
-		if(direction == Orientation.Horizontal)
-			setDirection(Orientation.Vertical);
+	public void changeOrientation() {
+		if(orientation == Orientation.Horizontal)
+			setOrientation(Orientation.Vertical);
 		else
-			setDirection(Orientation.Horizontal);
+			setOrientation(Orientation.Horizontal);
 	}
 	
 	public void paintComponent(Graphics g) {
@@ -43,7 +43,7 @@ public class DoubleImagePanel extends JPanel {
 			int imageWidth, imageHeight, xOffset, yOffset;
 			float containerRatio;
 			
-			if(this.direction == Orientation.Horizontal)
+			if(this.orientation == Orientation.Horizontal)
 				containerRatio = (float)(d.height / (float)(d.width / 2.0));
 			else
 				containerRatio = (float)(d.height / 2.0) / (float)(d.width);
@@ -52,12 +52,12 @@ public class DoubleImagePanel extends JPanel {
 			float scale;
 		
 			if(containerRatio > imageRatio) {
-				if(this.direction == Orientation.Horizontal)
+				if(this.orientation == Orientation.Horizontal)
 					scale = (float) ((d.width/2.0) / (float)leftImage.getWidth());
 				else
 					scale = (float) ((d.width) / (float)leftImage.getWidth());
 			} else {
-				if(this.direction == Orientation.Horizontal)
+				if(this.orientation == Orientation.Horizontal)
 					scale = d.height / (float)leftImage.getHeight();
 				else
 					scale = (float) ((d.height / 2.0) / (float)leftImage.getHeight());
@@ -66,7 +66,7 @@ public class DoubleImagePanel extends JPanel {
 			imageWidth = (int)(leftImage.getWidth() * scale);
 			imageHeight = (int)(leftImage.getHeight() * scale);
 			
-			if(this.direction == Orientation.Horizontal) {
+			if(this.orientation == Orientation.Horizontal) {
 				xOffset = (int) ((d.width - 2 * imageWidth) / 3.0);
 				yOffset = (d.height - imageHeight) / 2;
 			} else {
@@ -77,7 +77,7 @@ public class DoubleImagePanel extends JPanel {
 			g.drawImage(leftImage, xOffset, yOffset, imageWidth, imageHeight, null);
 			
 			if(rightImage != null) {
-				if(this.direction == Orientation.Horizontal) 
+				if(this.orientation == Orientation.Horizontal) 
 					g.drawImage(rightImage, 2 * xOffset + imageWidth, yOffset, imageWidth, imageHeight, null);
 				else
 					g.drawImage(rightImage, xOffset, 2 * yOffset + imageHeight, imageWidth, imageHeight, null);
