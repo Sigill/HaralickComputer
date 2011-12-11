@@ -11,14 +11,25 @@ public class TextureFeaturesComputer {
 	private Bitmap2D imageSource, imagePosterized;
 	private GLCM glcm;
 	private int numberOfGrayLevels;
-	private int windowSize;
+	private int windowRadius;
 	private TextureFeaturesImage _tfi;
+	private int xOffset, yOffset;
+	private boolean symmetricOffset;
+	
+	public final static int DEFAULT_X_OFFSET = 1;
+	public final static int DEFAULT_Y_OFFSET = 0;
+	public final static int DEFAULT_NUMBER_OF_GRAYLEVELS = 16;
+	public final static int DEFAULT_WINDOW_RADIUS = 2;
+	public final static boolean DEFAULT_SYMMETRIC_OFFSET = false;
 	
 	public TextureFeaturesComputer() {	
 		this.imageSource = null;
 		this.imagePosterized = null;
-		setNumberOfGrayLevels(16);
-		this.windowSize = 2;
+		setNumberOfGrayLevels(DEFAULT_NUMBER_OF_GRAYLEVELS);
+		this.windowRadius = DEFAULT_WINDOW_RADIUS;
+		this.xOffset = DEFAULT_X_OFFSET;
+		this.yOffset = DEFAULT_Y_OFFSET;
+		this.symmetricOffset = DEFAULT_SYMMETRIC_OFFSET;
 	}
 	
 	public Dimension getImageDimensions() {
@@ -27,6 +38,15 @@ public class TextureFeaturesComputer {
 	
 	public int getNumberOfGraylevels() { return this.numberOfGrayLevels; }
 	
+	public int getxOffset() { return xOffset; }
+	public void setxOffset(int xOffset) { this.xOffset = xOffset; }
+
+	public int getyOffset() { return yOffset; }
+	public void setyOffset(int yOffset) { this.yOffset = yOffset; }
+
+	public boolean isSymmetricOffset() { return symmetricOffset; }
+	public void setSymmetricOffset(boolean symmetricOffset) { this.symmetricOffset = symmetricOffset; }
+
 	public int getImageWidth() { return this.imageSource.getWidth(); };
 	public int getImageHeight() { return this.imageSource.getHeight(); };
 	
@@ -39,10 +59,10 @@ public class TextureFeaturesComputer {
 	}
 	
 	public void setSizeOfWindow(int size) {
-		if(this.windowSize == size)
+		if(this.windowRadius == size)
 			return;
 		
-		this.windowSize = size;
+		this.windowRadius = size;
 	}
 	
 	public void setImageSource(BufferedImage img) {
@@ -74,9 +94,9 @@ public class TextureFeaturesComputer {
 		
 		posterizeSource();
 		
-		for(i = 0; i < w; i++) {
+		for(j = (this.yOffset < 0 ? -this.yOffset : 0); j < (this.yOffset > 0 ? h - this.yOffset : h); ++j) {
 			
-			for(j = 0; j < h; j++) {
+			for(i = (this.xOffset < 0 ? -this.xOffset : 0); i < (this.xOffset > 0 ? w - this.xOffset : w); ++i) {
 				
 				this.glcm.reset();
 
@@ -91,20 +111,21 @@ public class TextureFeaturesComputer {
 		}
 	}
 	
-	public synchronized void computeForPixel(GLCM glcm, int x, int y, int width, int height) {
+	public synchronized void computeForPixel(GLCM glcm, int x, int y, int w, int h) {
 		int k, l;
-		
-		for(k = x - this.windowSize; k < x + this.windowSize; k++) {
-			
-			if((k > 0) && (k < width-1)) {
+
+		for(l = y - this.windowRadius; l < y + this.windowRadius; l++) {
+
+			if((l > (this.xOffset < 0 ? -this.xOffset : 0)) && (l < (this.yOffset > 0 ? h - this.yOffset : h))) {
 				
-				for(l = y - this.windowSize; l < y + this.windowSize; l++) {
-					
-					if((l > 0) && (l < height-1)) {
-						
-						glcm.inc(this.imagePosterized.get(k, l), this.imagePosterized.get(k, l+1));
-						glcm.inc(this.imagePosterized.get(k, l+1), this.imagePosterized.get(k, l));
-						
+				for(k = x - this.windowRadius; k < x + this.windowRadius; k++) {
+
+					if((k > (this.xOffset < 0 ? -this.xOffset : 0)) && (k < (this.xOffset > 0 ? w - this.xOffset : w))) {
+
+						glcm.inc(this.imagePosterized.get(k, l), this.imagePosterized.get(k + this.xOffset, l + this.yOffset));
+						if(this.symmetricOffset)
+							glcm.inc(this.imagePosterized.get(k + this.xOffset, l + this.yOffset), this.imagePosterized.get(k, l));
+
 					}
 					
 				}

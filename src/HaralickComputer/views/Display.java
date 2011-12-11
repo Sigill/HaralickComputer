@@ -23,15 +23,19 @@ import HaralickComputer.core.DoubleImagePanel;
 import HaralickComputer.core.GLCM;
 import HaralickComputer.core.GLCM_Widget;
 import HaralickComputer.core.TextureFeatures;
+import HaralickComputer.core.DoubleImagePanel.Orientation;
+
 import javax.swing.JLabel;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JSpinner;
-import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JButton;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JCheckBox;
 
 public class Display extends JFrame implements ActionListener, ChangeListener, Observer {
 	private static final long serialVersionUID = 4923476327038677535L;
@@ -48,16 +52,16 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 	
 	JFileChooser fc;
 	TextureFeaturesComputer tfc = new TextureFeaturesComputer();
-	private JLabel lblNumberOfGrayLevels;
-	private JSpinner spinner_numberOfGrayLevels;
+	private JLabel lblNumberOfGrayLevels, lblCoocurrenceMatrix, lblXoffset, lblYoffset;
 	private JButton btnValidateParameters;
-	private JSpinner spinner_radiusOfWindow;
 	private GLCM_Widget glcm_widget;
 	private DoubleImagePanel.MouseObservable imagesPanel_mouse_observable;
+	private JSpinner spinner_numberOfGrayLevels, spinner_radiusOfWindow, spinner_y_offset, spinner_x_offset;
+	private JCheckBox checkboxSymmetricOffset;
 	
 	public Display() {
 		super("HaralickComputer");
-		setMinimumSize(new Dimension(500, 400));
+		setMinimumSize(new Dimension(800, 600));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Container contentPanel = getContentPane();
 		
@@ -65,8 +69,9 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		
 		setJMenuBar(buildMenuBar());
 		
-		imagesPanel = new DoubleImagePanel();
 		contentPanel.setLayout(new BorderLayout());
+		imagesPanel = new DoubleImagePanel();
+		imagesPanel.setOrientation(Orientation.Vertical);
 		contentPanel.add(imagesPanel, BorderLayout.CENTER);
 		
 		this.imagesPanel_mouse_observable = this.imagesPanel.getObservable();
@@ -80,54 +85,115 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 	
 	private JPanel buildSidebar() {
 		JPanel sidebar = new JPanel();
+		sidebar.setBorder(new EmptyBorder(0, 5, 0, 5));
+		GridBagLayout gbl_sidebar = new GridBagLayout();
+		gbl_sidebar.columnWidths = new int[]{300, 0};
+		gbl_sidebar.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_sidebar.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_sidebar.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		sidebar.setLayout(gbl_sidebar);
+		
+		spinner_numberOfGrayLevels = new JSpinner(new SpinnerNumberModel(TextureFeaturesComputer.DEFAULT_NUMBER_OF_GRAYLEVELS, 0, 255, 1));
+		spinner_numberOfGrayLevels.addChangeListener(this);
+		
+		lblCoocurrenceMatrix = new JLabel("Coocurrence matrix");
+		GridBagConstraints gbc_lblCoocurrenceMatrix = new GridBagConstraints();
+		gbc_lblCoocurrenceMatrix.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblCoocurrenceMatrix.insets = new Insets(0, 0, 5, 0);
+		gbc_lblCoocurrenceMatrix.gridx = 0;
+		gbc_lblCoocurrenceMatrix.gridy = 0;
+		sidebar.add(lblCoocurrenceMatrix, gbc_lblCoocurrenceMatrix);
+		
+		glcm_widget = new GLCM_Widget(300);
+		GridBagConstraints gbc_glcm_widget = new GridBagConstraints();
+		gbc_glcm_widget.anchor = GridBagConstraints.NORTH;
+		gbc_glcm_widget.fill = GridBagConstraints.HORIZONTAL;
+		gbc_glcm_widget.insets = new Insets(0, 0, 5, 0);
+		gbc_glcm_widget.gridx = 0;
+		gbc_glcm_widget.gridy = 1;
+		sidebar.add(glcm_widget, gbc_glcm_widget);
 		
 		lblNumberOfGrayLevels = new JLabel("Number of gray levels");
+		GridBagConstraints gbc_lblNumberOfGrayLevels = new GridBagConstraints();
+		gbc_lblNumberOfGrayLevels.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblNumberOfGrayLevels.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNumberOfGrayLevels.gridx = 0;
+		gbc_lblNumberOfGrayLevels.gridy = 2;
+		sidebar.add(lblNumberOfGrayLevels, gbc_lblNumberOfGrayLevels);
+		GridBagConstraints gbc_spinner_numberOfGrayLevels = new GridBagConstraints();
+		gbc_spinner_numberOfGrayLevels.fill = GridBagConstraints.HORIZONTAL;
+		gbc_spinner_numberOfGrayLevels.anchor = GridBagConstraints.NORTH;
+		gbc_spinner_numberOfGrayLevels.insets = new Insets(0, 0, 5, 0);
+		gbc_spinner_numberOfGrayLevels.gridx = 0;
+		gbc_spinner_numberOfGrayLevels.gridy = 3;
+		sidebar.add(spinner_numberOfGrayLevels, gbc_spinner_numberOfGrayLevels);
 		
-		spinner_numberOfGrayLevels = new JSpinner(new SpinnerNumberModel(16, 0, 255, 1));
-		spinner_numberOfGrayLevels.addChangeListener(this);
+		JLabel lblSizeOfWindow = new JLabel("Radius of window");
+		GridBagConstraints gbc_lblSizeOfWindow = new GridBagConstraints();
+		gbc_lblSizeOfWindow.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblSizeOfWindow.insets = new Insets(0, 0, 5, 0);
+		gbc_lblSizeOfWindow.gridx = 0;
+		gbc_lblSizeOfWindow.gridy = 4;
+		sidebar.add(lblSizeOfWindow, gbc_lblSizeOfWindow);
+		
+		spinner_radiusOfWindow = new JSpinner(new SpinnerNumberModel(TextureFeaturesComputer.DEFAULT_WINDOW_RADIUS, 1, null, 1));
+		GridBagConstraints gbc_spinner_radiusOfWindow = new GridBagConstraints();
+		gbc_spinner_radiusOfWindow.fill = GridBagConstraints.HORIZONTAL;
+		gbc_spinner_radiusOfWindow.insets = new Insets(0, 0, 5, 0);
+		gbc_spinner_radiusOfWindow.gridx = 0;
+		gbc_spinner_radiusOfWindow.gridy = 5;
+		sidebar.add(spinner_radiusOfWindow, gbc_spinner_radiusOfWindow);
 		
 		btnValidateParameters = new JButton("Validate parameters");
 		btnValidateParameters.addActionListener(this);
 		
-		JLabel lblSizeOfWindow = new JLabel("Radius of window");
+		lblXoffset = new JLabel("X-offset");
+		GridBagConstraints gbc_lblXoffset = new GridBagConstraints();
+		gbc_lblXoffset.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblXoffset.insets = new Insets(0, 0, 5, 0);
+		gbc_lblXoffset.gridx = 0;
+		gbc_lblXoffset.gridy = 6;
+		sidebar.add(lblXoffset, gbc_lblXoffset);
 		
-		spinner_radiusOfWindow = new JSpinner(new SpinnerNumberModel(2, 1, null, 1));
+		spinner_x_offset = new JSpinner();
+		spinner_x_offset.setModel(new SpinnerNumberModel(TextureFeaturesComputer.DEFAULT_X_OFFSET, null, null, 1));
+		GridBagConstraints gbc_spinner_x_offset = new GridBagConstraints();
+		gbc_spinner_x_offset.fill = GridBagConstraints.HORIZONTAL;
+		gbc_spinner_x_offset.insets = new Insets(0, 0, 5, 0);
+		gbc_spinner_x_offset.gridx = 0;
+		gbc_spinner_x_offset.gridy = 7;
+		sidebar.add(spinner_x_offset, gbc_spinner_x_offset);
 		
-		glcm_widget = new GLCM_Widget(300);
+		lblYoffset = new JLabel("Y-offset");
+		GridBagConstraints gbc_lblYoffset = new GridBagConstraints();
+		gbc_lblYoffset.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblYoffset.insets = new Insets(0, 0, 5, 0);
+		gbc_lblYoffset.gridx = 0;
+		gbc_lblYoffset.gridy = 8;
+		sidebar.add(lblYoffset, gbc_lblYoffset);
 		
-		GroupLayout gl_sidebar = new GroupLayout(sidebar);
-		gl_sidebar.setHorizontalGroup(
-			gl_sidebar.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_sidebar.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_sidebar.createParallelGroup(Alignment.LEADING)
-						.addComponent(glcm_widget, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(lblNumberOfGrayLevels)
-						.addComponent(btnValidateParameters, GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
-						.addComponent(spinner_numberOfGrayLevels, GroupLayout.PREFERRED_SIZE, 98, GroupLayout.PREFERRED_SIZE)
-						.addGroup(gl_sidebar.createParallelGroup(Alignment.TRAILING, false)
-							.addComponent(spinner_radiusOfWindow, Alignment.LEADING)
-							.addComponent(lblSizeOfWindow, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-					.addContainerGap())
-		);
-		gl_sidebar.setVerticalGroup(
-			gl_sidebar.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_sidebar.createSequentialGroup()
-					.addContainerGap()
-					.addComponent(lblNumberOfGrayLevels)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(spinner_numberOfGrayLevels, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(lblSizeOfWindow)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(spinner_radiusOfWindow, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(glcm_widget, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(btnValidateParameters)
-					.addContainerGap())
-		);
-		sidebar.setLayout(gl_sidebar);
+		spinner_y_offset = new JSpinner();
+		spinner_y_offset.setModel(new SpinnerNumberModel(TextureFeaturesComputer.DEFAULT_Y_OFFSET, null, null, 1));
+		GridBagConstraints gbc_spinner_y_offset = new GridBagConstraints();
+		gbc_spinner_y_offset.fill = GridBagConstraints.HORIZONTAL;
+		gbc_spinner_y_offset.insets = new Insets(0, 0, 5, 0);
+		gbc_spinner_y_offset.gridx = 0;
+		gbc_spinner_y_offset.gridy = 9;
+		sidebar.add(spinner_y_offset, gbc_spinner_y_offset);
+		
+		checkboxSymmetricOffset = new JCheckBox("Symmetric offset");
+		GridBagConstraints gbc_checkboxSymmetricOffset = new GridBagConstraints();
+		gbc_checkboxSymmetricOffset.fill = GridBagConstraints.HORIZONTAL;
+		gbc_checkboxSymmetricOffset.insets = new Insets(0, 0, 5, 0);
+		gbc_checkboxSymmetricOffset.gridx = 0;
+		gbc_checkboxSymmetricOffset.gridy = 10;
+		sidebar.add(checkboxSymmetricOffset, gbc_checkboxSymmetricOffset);
+		GridBagConstraints gbc_btnValidateParameters = new GridBagConstraints();
+		gbc_btnValidateParameters.anchor = GridBagConstraints.NORTH;
+		gbc_btnValidateParameters.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnValidateParameters.gridx = 0;
+		gbc_btnValidateParameters.gridy = 11;
+		sidebar.add(btnValidateParameters, gbc_btnValidateParameters);
 		
 		return sidebar;
 	}
@@ -219,6 +285,9 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		} else if (source == btnValidateParameters) {
 			this.tfc.setNumberOfGrayLevels((Integer)spinner_numberOfGrayLevels.getValue());
 			this.tfc.setSizeOfWindow((Integer)spinner_radiusOfWindow.getValue());
+			this.tfc.setxOffset((Integer)spinner_x_offset.getValue());
+			this.tfc.setyOffset((Integer)spinner_y_offset.getValue());
+			this.tfc.setSymmetricOffset(checkboxSymmetricOffset.isSelected());
 			this.tfc.compute();
 			this.live_GLCM = new GLCM(this.tfc.getNumberOfGraylevels());
 			this.live_GLCM.normalize();
