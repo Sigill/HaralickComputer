@@ -3,9 +3,12 @@ package HaralickComputer.views;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -17,6 +20,8 @@ import javax.swing.JPanel;
 
 import HaralickComputer.controllers.TextureFeaturesComputer;
 import HaralickComputer.core.DoubleImagePanel;
+import HaralickComputer.core.GLCM;
+import HaralickComputer.core.GLCM_Widget;
 import HaralickComputer.core.TextureFeatures;
 import javax.swing.JLabel;
 import javax.swing.GroupLayout;
@@ -28,7 +33,7 @@ import javax.swing.JButton;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
-public class Display extends JFrame implements ActionListener, ChangeListener {
+public class Display extends JFrame implements ActionListener, ChangeListener, Observer {
 	private static final long serialVersionUID = 4923476327038677535L;
 	
 	DoubleImagePanel imagesPanel;
@@ -39,12 +44,16 @@ public class Display extends JFrame implements ActionListener, ChangeListener {
 		menuItemDisplayClusterProminence, menuItemDisplayHaralickCorrelation,
 		menuSwitchDisplay;
 	
+	private GLCM live_GLCM;
+	
 	JFileChooser fc;
 	TextureFeaturesComputer tfc = new TextureFeaturesComputer();
 	private JLabel lblNumberOfGrayLevels;
 	private JSpinner spinner_numberOfGrayLevels;
 	private JButton btnValidateParameters;
 	private JSpinner spinner_radiusOfWindow;
+	private GLCM_Widget glcm_widget;
+	private DoubleImagePanel.MouseObservable imagesPanel_mouse_observable;
 	
 	public Display() {
 		super("HaralickComputer");
@@ -59,6 +68,9 @@ public class Display extends JFrame implements ActionListener, ChangeListener {
 		imagesPanel = new DoubleImagePanel();
 		contentPanel.setLayout(new BorderLayout());
 		contentPanel.add(imagesPanel, BorderLayout.CENTER);
+		
+		this.imagesPanel_mouse_observable = this.imagesPanel.getObservable();
+		this.imagesPanel_mouse_observable.addObserver(this);
 		
 		contentPanel.add(buildSidebar(), BorderLayout.EAST);
 
@@ -81,18 +93,21 @@ public class Display extends JFrame implements ActionListener, ChangeListener {
 		
 		spinner_radiusOfWindow = new JSpinner(new SpinnerNumberModel(2, 1, null, 1));
 		
+		glcm_widget = new GLCM_Widget(300);
+		
 		GroupLayout gl_sidebar = new GroupLayout(sidebar);
 		gl_sidebar.setHorizontalGroup(
-			gl_sidebar.createParallelGroup(Alignment.LEADING)
+			gl_sidebar.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_sidebar.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_sidebar.createParallelGroup(Alignment.LEADING)
+						.addComponent(glcm_widget, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 						.addComponent(lblNumberOfGrayLevels)
-						.addComponent(btnValidateParameters, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(lblSizeOfWindow)
+						.addComponent(btnValidateParameters, GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
+						.addComponent(spinner_numberOfGrayLevels, GroupLayout.PREFERRED_SIZE, 98, GroupLayout.PREFERRED_SIZE)
 						.addGroup(gl_sidebar.createParallelGroup(Alignment.TRAILING, false)
 							.addComponent(spinner_radiusOfWindow, Alignment.LEADING)
-							.addComponent(spinner_numberOfGrayLevels, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)))
+							.addComponent(lblSizeOfWindow, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
 					.addContainerGap())
 		);
 		gl_sidebar.setVerticalGroup(
@@ -106,7 +121,9 @@ public class Display extends JFrame implements ActionListener, ChangeListener {
 					.addComponent(lblSizeOfWindow)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(spinner_radiusOfWindow, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED, 202, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(glcm_widget, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(btnValidateParameters)
 					.addContainerGap())
 		);
@@ -200,9 +217,11 @@ public class Display extends JFrame implements ActionListener, ChangeListener {
 		} else if(source == menuSwitchDisplay) {
 			imagesPanel.changeOrientation();
 		} else if (source == btnValidateParameters) {
-			tfc.setNumberOfGrayLevels((Integer)spinner_numberOfGrayLevels.getValue());
-			tfc.setSizeOfWindow((Integer)spinner_radiusOfWindow.getValue());
-			tfc.compute();
+			this.tfc.setNumberOfGrayLevels((Integer)spinner_numberOfGrayLevels.getValue());
+			this.tfc.setSizeOfWindow((Integer)spinner_radiusOfWindow.getValue());
+			this.tfc.compute();
+			this.live_GLCM = new GLCM(this.tfc.getNumberOfGraylevels());
+			this.live_GLCM.normalize();
 		}
 		update(getGraphics());
 	}
@@ -211,6 +230,29 @@ public class Display extends JFrame implements ActionListener, ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		//Object source = e.getSource();
 		
+		
+	}
+
+	@Override
+	public void update(Observable o, Object arg1) {
+		if(o == this.imagesPanel_mouse_observable) {
+			Point pos = this.imagesPanel.getMousePositionOnImage();
+			
+			if(!(pos.x >= 0 && pos.y >= 0 && pos.x < this.tfc.getImageWidth() && pos.y < this.tfc.getImageHeight())) {
+				return;
+			}
+			
+			if((this.live_GLCM == null) || (this.live_GLCM.getSize() != this.tfc.getNumberOfGraylevels()))
+					this.live_GLCM = new GLCM(this.tfc.getNumberOfGraylevels());
+			
+			this.live_GLCM.reset();
+			
+			this.tfc.computeForPixel(this.live_GLCM, pos.x, pos.y, this.tfc.getImageWidth(), this.tfc.getImageWidth());
+			this.live_GLCM.normalize();
+			
+			this.glcm_widget.setGLCM(this.live_GLCM);
+			this.glcm_widget.repaint();
+		}
 		
 	}
 }

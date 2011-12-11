@@ -25,6 +25,10 @@ public class GLCM {
 		reset();
 	}
 	
+	public int getSize() {
+		return this._size;
+	}
+	
 	public void reset() {
 		for(int i = 0; i < this._size * this._size; i++) {
 			this._data[i] = 0;
@@ -105,6 +109,16 @@ public class GLCM {
 		}
 		
 		this._haralickCorrelation = (this._haralickCorrelation - this._marginalMean * this._marginalMean) / this._marginalDevSquared;
+	}
+	
+	public float getMax() {
+		float max = 0;
+		
+		for(int i = 0; i < this._size * this._size; i++) {
+			if(this._data[i] > max) max = this._data[i];
+		}
+		
+		return max;
 	}
 	
 	private float computeDissimilarity() {

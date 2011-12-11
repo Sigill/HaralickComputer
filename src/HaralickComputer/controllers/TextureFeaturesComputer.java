@@ -1,5 +1,6 @@
 package HaralickComputer.controllers;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
 import HaralickComputer.core.Bitmap2D;
@@ -19,6 +20,15 @@ public class TextureFeaturesComputer {
 		setNumberOfGrayLevels(16);
 		this.windowSize = 2;
 	}
+	
+	public Dimension getImageDimensions() {
+		return new Dimension(this.imageSource.getWidth(), this.imageSource.getHeight());
+	}
+	
+	public int getNumberOfGraylevels() { return this.numberOfGrayLevels; }
+	
+	public int getImageWidth() { return this.imageSource.getWidth(); };
+	public int getImageHeight() { return this.imageSource.getHeight(); };
 	
 	public void setNumberOfGrayLevels(int count) {
 		if(this.numberOfGrayLevels == count)
@@ -70,7 +80,7 @@ public class TextureFeaturesComputer {
 				
 				this.glcm.reset();
 
-				computeForPixel(i, j, w, h);
+				computeForPixel(this.glcm, i, j, w, h);
 				
 				this.glcm.normalize();
 				this.glcm.compute();
@@ -81,7 +91,7 @@ public class TextureFeaturesComputer {
 		}
 	}
 	
-	public synchronized void computeForPixel(int x, int y, int width, int height) {
+	public synchronized void computeForPixel(GLCM glcm, int x, int y, int width, int height) {
 		int k, l;
 		
 		for(k = x - this.windowSize; k < x + this.windowSize; k++) {
@@ -92,8 +102,8 @@ public class TextureFeaturesComputer {
 					
 					if((l > 0) && (l < height-1)) {
 						
-						this.glcm.inc(this.imagePosterized.get(k, l), this.imagePosterized.get(k, l+1));
-						//this._cooc.inc(this._image.get(k, l), this._image.get(k+1, l));
+						glcm.inc(this.imagePosterized.get(k, l), this.imagePosterized.get(k, l+1));
+						glcm.inc(this.imagePosterized.get(k, l+1), this.imagePosterized.get(k, l));
 						
 					}
 					

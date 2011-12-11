@@ -56,7 +56,7 @@ public class Bitmap2D {
 	
 	public int get(int x, int y) throws IndexOutOfBoundsException {
 		if(!validCoordinates(x, y)) {
-			throw new IndexOutOfBoundsException("Coordinates outside of image.");
+			throw new IndexOutOfBoundsException("Coordinates(" + x + "; " + y + ") outside of image.");
 		}
 		return this._data[y * this._width + x];
 	}
