@@ -1,5 +1,7 @@
 package HaralickComputer.core;
 
+import java.util.Arrays;
+
 public class GLCM {
 	private int _size;
 	private int[] _data;
@@ -7,12 +9,12 @@ public class GLCM {
 	
 	private float _pixelMean, _pixelVariance, _marginalMean, _marginalDevSquared;
 	
-	private float _energy, _entropy, _correlation, 
-		_inverseDifferenceMoment, _inertia, _clusterShade,
+	private float _angularSecondMoment, _entropy, _correlation, 
+		_inverseDifferenceMoment, _contrast, _clusterShade,
 		_clusterProminence, _haralickCorrelation;
 	
-	public enum TextureFeatureName { Energy, Entropy, Correlation,
-		InverseDifferenceMoment, Inertia, ClusterShade, ClusterProminence,
+	public enum TextureFeatureName { AngularSecondMoment, Entropy, Correlation,
+		InverseDifferenceMoment, Contrast, ClusterShade, ClusterProminence,
 		HaralickCorrelation };
 
 	
@@ -30,9 +32,10 @@ public class GLCM {
 	}
 	
 	public void reset() {
-		for(int i = 0; i < this._size * this._size; i++) {
-			this._data[i] = 0;
-		}
+		Arrays.fill(this._data, 0);
+		//for(int i = 0; i < this._size * this._size; i++) {
+		//	this._data[i] = 0;
+		//}
 	}
 	
 	private boolean validIndexes(int l1, int l2) {
@@ -85,8 +88,8 @@ public class GLCM {
 		this.computeMeansAndVariance();
 		double log2 = Math.log(2);
 		
-		_energy = 0; _entropy = 0; _correlation = 0; 
-		_inverseDifferenceMoment = 0; _inertia = 0; _clusterShade = 0;
+		_angularSecondMoment = 0; _entropy = 0; _correlation = 0; 
+		_inverseDifferenceMoment = 0; _contrast = 0; _clusterShade = 0;
 		_clusterProminence = 0; _haralickCorrelation = 0;
 		
 		float pixelVarianceSquared = this._pixelVariance * this._pixelVariance;
@@ -97,11 +100,14 @@ public class GLCM {
 				
 				if(f == 0) continue;
 				
-			    this._energy += f * f;
+			    this._angularSecondMoment += f * f;
+			    this._contrast += (i - j) * (i - j) * f;
 			    this._entropy -= (f > 0.0001) ? f * Math.log(f) / log2 : 0;
-			    this._correlation += ( (i - this._pixelMean) * (j - this._pixelMean) * f) / pixelVarianceSquared;
+			    
+			    if(pixelVarianceSquared > 0.0)
+			    	this._correlation += ( (i - this._pixelMean) * (j - this._pixelMean) * f) / pixelVarianceSquared;
 			    this._inverseDifferenceMoment += f / (1.0 + (i - j) * (i - j) );
-			    this._inertia += (i - j) * (i - j) * f;
+			    
 			    this._clusterShade += Math.pow((i - this._pixelMean) + (j - this._pixelMean), 3) * f;
 			    this._clusterProminence += Math.pow((i - this._pixelMean) + (j - this._pixelMean), 4) * f;
 			    this._haralickCorrelation += i * j * f;
@@ -225,16 +231,16 @@ public class GLCM {
 	
 	public float get(int feature) {
 		switch(feature) {
-		case TextureFeatures.Energy:
-			return this._energy;
+		case TextureFeatures.AngularSecondMoment:
+			return this._angularSecondMoment;
 		case TextureFeatures.Entropy:
 			return this._entropy;
 		case TextureFeatures.Correlation:
 			return this._correlation;
 		case TextureFeatures.InverseDifferenceMoment:
 			return this._inverseDifferenceMoment;
-		case TextureFeatures.Inertia:
-			return this._inertia;
+		case TextureFeatures.Contrast:
+			return this._contrast;
 		case TextureFeatures.ClusterShade:
 			return this._clusterShade;
 		case TextureFeatures.ClusterProminence:

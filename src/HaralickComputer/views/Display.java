@@ -11,6 +11,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.imageio.ImageIO;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -42,15 +43,16 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 	
 	DoubleImagePanel imagesPanel;
 	JMenuItem menuItemOpen, 
-		menuItemDisplayEnergy, menuItemDisplayEntropy, 
+		menuItemDisplayAngularSecondMoment, menuItemDisplayEntropy, 
 		menuItemDisplayCorrelation, menuItemDisplayInverseDifferenceMoment, 
-		menuItemDisplayInertia, menuItemDisplayClusterShade, 
+		menuItemDisplayContrast, menuItemDisplayClusterShade, 
 		menuItemDisplayClusterProminence, menuItemDisplayHaralickCorrelation,
-		menuSwitchDisplay;
+		menuItemSwitchDisplay,
+		menuItemExportCSV;
 	
 	private GLCM live_GLCM;
 	
-	JFileChooser fc;
+	JFileChooser fc, fc_export;
 	TextureFeaturesComputer tfc = new TextureFeaturesComputer();
 	private JLabel lblNumberOfGrayLevels, lblCoocurrenceMatrix, lblXoffset, lblYoffset;
 	private JButton btnValidateParameters;
@@ -66,6 +68,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		Container contentPanel = getContentPane();
 		
 		fc = new JFileChooser();
+		fc_export = new JFileChooser();
 		
 		setJMenuBar(buildMenuBar());
 		
@@ -212,38 +215,45 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		JMenu menuDisplay = new JMenu("Display");
 		menubar.add(menuDisplay);
 		
-		menuItemDisplayEnergy = new JMenuItem("Display energy");
+		menuItemDisplayAngularSecondMoment = new JMenuItem("Display angular second moment");
 		menuItemDisplayEntropy = new JMenuItem("Display entropy"); 
 		menuItemDisplayCorrelation = new JMenuItem("Display correlation");
 		menuItemDisplayInverseDifferenceMoment = new JMenuItem("Display inverse difference moment"); 
-		menuItemDisplayInertia = new JMenuItem("Display inertia");
+		menuItemDisplayContrast = new JMenuItem("Display contrast");
 		menuItemDisplayClusterShade = new JMenuItem("Display cluster shade"); 
 		menuItemDisplayClusterProminence = new JMenuItem("Display cluster prominence");
 		menuItemDisplayHaralickCorrelation = new JMenuItem("Display haralick correlation");
 		
-		menuDisplay.add(menuItemDisplayEnergy);
+		menuDisplay.add(menuItemDisplayAngularSecondMoment);
 		menuDisplay.add(menuItemDisplayEntropy);
 		menuDisplay.add(menuItemDisplayCorrelation);
 		menuDisplay.add(menuItemDisplayInverseDifferenceMoment);
-		menuDisplay.add(menuItemDisplayInertia);
+		menuDisplay.add(menuItemDisplayContrast);
 		menuDisplay.add(menuItemDisplayClusterShade);
 		menuDisplay.add(menuItemDisplayClusterProminence);
 		menuDisplay.add(menuItemDisplayHaralickCorrelation);
 		
-		menuItemDisplayEnergy.addActionListener(this);
+		menuItemDisplayAngularSecondMoment.addActionListener(this);
 		menuItemDisplayEntropy.addActionListener(this);
 		menuItemDisplayCorrelation.addActionListener(this);
 		menuItemDisplayInverseDifferenceMoment.addActionListener(this);
-		menuItemDisplayInertia.addActionListener(this);
+		menuItemDisplayContrast.addActionListener(this);
 		menuItemDisplayClusterShade.addActionListener(this);
 		menuItemDisplayClusterProminence.addActionListener(this);
 		menuItemDisplayHaralickCorrelation.addActionListener(this);
 		
 		menuDisplay.addSeparator();
 		
-		menuSwitchDisplay = new JMenuItem("Switch display");
-		menuDisplay.add(menuSwitchDisplay);
-		menuSwitchDisplay.addActionListener(this);
+		menuItemSwitchDisplay = new JMenuItem("Switch display");
+		menuDisplay.add(menuItemSwitchDisplay);
+		menuItemSwitchDisplay.addActionListener(this);
+		
+		JMenu menuExport = new JMenu("Export");
+		menubar.add(menuExport);
+		
+		menuItemExportCSV = new JMenuItem("Export CSV");
+		menuExport.add(menuItemExportCSV);
+		menuItemExportCSV.addActionListener(this);
 		
 		return menubar;
 	}
@@ -264,23 +274,23 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 					e1.printStackTrace();
 				}
 			}
-		} else if(source == menuItemDisplayEnergy) {
-			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.Energy));
+		} else if(source == menuItemDisplayAngularSecondMoment) {
+			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.AngularSecondMoment));
 		} else if(source == menuItemDisplayEntropy) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.Entropy));
 		} else if(source == menuItemDisplayCorrelation) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.Correlation));
 		} else if(source == menuItemDisplayInverseDifferenceMoment) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.InverseDifferenceMoment));
-		} else if(source == menuItemDisplayInertia) {
-			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.Inertia));
+		} else if(source == menuItemDisplayContrast) {
+			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.Contrast));
 		} else if(source == menuItemDisplayClusterShade) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.ClusterShade));
 		} else if(source == menuItemDisplayClusterProminence) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.ClusterProminence));
 		} else if(source == menuItemDisplayHaralickCorrelation) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.HaralickCorrelation));
-		} else if(source == menuSwitchDisplay) {
+		} else if(source == menuItemSwitchDisplay) {
 			imagesPanel.changeOrientation();
 		} else if (source == btnValidateParameters) {
 			this.tfc.setNumberOfGrayLevels((Integer)spinner_numberOfGrayLevels.getValue());
@@ -291,7 +301,12 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 			this.tfc.compute();
 			this.live_GLCM = new GLCM(this.tfc.getNumberOfGraylevels());
 			this.live_GLCM.normalize();
+		} else if (source == menuItemExportCSV) {
+			if(fc_export.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+				this.tfc.exportCSV(fc_export.getSelectedFile()); 
+			}
 		}
+		
 		update(getGraphics());
 	}
 

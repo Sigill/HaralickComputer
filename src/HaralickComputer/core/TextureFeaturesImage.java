@@ -2,6 +2,10 @@ package HaralickComputer.core;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class TextureFeaturesImage {
 	private int _width, _height;
@@ -23,11 +27,11 @@ public class TextureFeaturesImage {
 	}
 	
 	public void setFromGLCM(int x, int y, GLCM glcm) {
-		set(x, y, TextureFeatures.Energy, glcm.get(TextureFeatures.Energy));
+		set(x, y, TextureFeatures.AngularSecondMoment, glcm.get(TextureFeatures.AngularSecondMoment));
 		set(x, y, TextureFeatures.Entropy, glcm.get(TextureFeatures.Entropy));
 		set(x, y, TextureFeatures.Correlation, glcm.get(TextureFeatures.Correlation));
 		set(x, y, TextureFeatures.InverseDifferenceMoment, glcm.get(TextureFeatures.InverseDifferenceMoment));
-		set(x, y, TextureFeatures.Inertia, glcm.get(TextureFeatures.Inertia));
+		set(x, y, TextureFeatures.Contrast, glcm.get(TextureFeatures.Contrast));
 		set(x, y, TextureFeatures.ClusterShade, glcm.get(TextureFeatures.ClusterShade));
 		set(x, y, TextureFeatures.ClusterProminence, glcm.get(TextureFeatures.ClusterProminence));
 		set(x, y, TextureFeatures.HaralickCorrelation, glcm.get(TextureFeatures.HaralickCorrelation));
@@ -60,5 +64,27 @@ public class TextureFeaturesImage {
 		}
 		
 		return img;
+	}
+	
+	public void exportCSV(File file) {
+		int i, j, f;
+		String s;
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+			
+			for(i = 0; i < this._width; i++) {
+				for(j = 0; j < this._height; j++) {
+					s = "" + this._data[getOffset(i, j, 0)];
+					for(f = 1; f < TextureFeatures._nbFeatures; ++f) {
+						s += "; " + this._data[getOffset(i, j, f)];
+					}
+					writer.write(s + "\n");
+				}
+			}
+			
+			writer.close();
+		} catch (IOException x) {
+		    System.err.format("IOException: %s%n", x);
+		}
 	}
 }

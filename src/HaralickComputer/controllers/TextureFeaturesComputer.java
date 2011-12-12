@@ -2,6 +2,7 @@ package HaralickComputer.controllers;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 import HaralickComputer.core.Bitmap2D;
 import HaralickComputer.core.GLCM;
@@ -102,7 +103,7 @@ public class TextureFeaturesComputer {
 
 				computeForPixel(this.glcm, i, j, w, h);
 				
-				this.glcm.normalize();
+				//this.glcm.normalize();
 				this.glcm.compute();
 				this._tfi.setFromGLCM(i, j, this.glcm);
 				
@@ -116,11 +117,11 @@ public class TextureFeaturesComputer {
 
 		for(l = y - this.windowRadius; l < y + this.windowRadius; l++) {
 
-			if((l > (this.xOffset < 0 ? -this.xOffset : 0)) && (l < (this.yOffset > 0 ? h - this.yOffset : h))) {
+			if((l >= (this.yOffset < 0 ? -this.yOffset : 0)) && (l < (this.yOffset > 0 ? h - this.yOffset : h))) {
 				
 				for(k = x - this.windowRadius; k < x + this.windowRadius; k++) {
 
-					if((k > (this.xOffset < 0 ? -this.xOffset : 0)) && (k < (this.xOffset > 0 ? w - this.xOffset : w))) {
+					if((k >= (this.xOffset < 0 ? -this.xOffset : 0)) && (k < (this.xOffset > 0 ? w - this.xOffset : w))) {
 
 						glcm.inc(this.imagePosterized.get(k, l), this.imagePosterized.get(k + this.xOffset, l + this.yOffset));
 						if(this.symmetricOffset)
@@ -133,6 +134,10 @@ public class TextureFeaturesComputer {
 			}
 			
 		}
+	}
+	
+	public void exportCSV(File file) {
+		this._tfi.exportCSV(file);
 	}
 
 }
