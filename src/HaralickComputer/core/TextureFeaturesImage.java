@@ -72,9 +72,8 @@ public class TextureFeaturesImage {
 		String s;
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-			
-			for(i = 0; i < this._width; i++) {
-				for(j = 0; j < this._height; j++) {
+			for(j = 0; j < this._height; ++j) {
+				for(i = 0; i < this._width; ++i) {
 					s = "" + this._data[getOffset(i, j, 0)];
 					for(f = 1; f < TextureFeatures._nbFeatures; ++f) {
 						s += "; " + this._data[getOffset(i, j, f)];

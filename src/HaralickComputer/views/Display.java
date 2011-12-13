@@ -336,7 +336,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 			
 			this.live_GLCM.reset();
 			
-			this.tfc.computeForPixel(this.live_GLCM, pos.x, pos.y, this.tfc.getImageWidth(), this.tfc.getImageWidth());
+			this.tfc.computeForPixel(this.live_GLCM, pos.x, pos.y, this.tfc.getImageWidth(), this.tfc.getImageHeight());
 			this.live_GLCM.normalize();
 			
 			this.glcm_widget.setGLCM(this.live_GLCM);

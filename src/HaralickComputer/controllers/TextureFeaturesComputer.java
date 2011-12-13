@@ -115,15 +115,16 @@ public class TextureFeaturesComputer {
 	public synchronized void computeForPixel(GLCM glcm, int x, int y, int w, int h) {
 		int k, l;
 
-		for(l = y - this.windowRadius; l < y + this.windowRadius; l++) {
+		for(l = y - this.windowRadius; l < y + this.windowRadius + 1; ++l) {
 
-			if((l >= (this.yOffset < 0 ? -this.yOffset : 0)) && (l < (this.yOffset > 0 ? h - this.yOffset : h))) {
+			if((l >= (this.yOffset < 0 ? -this.yOffset : 0)) && (l < (this.yOffset > 0 ? h - this.yOffset - 1 : h))) {
 				
-				for(k = x - this.windowRadius; k < x + this.windowRadius; k++) {
+				for(k = x - this.windowRadius; k < x + this.windowRadius + 1; ++k) {
 
-					if((k >= (this.xOffset < 0 ? -this.xOffset : 0)) && (k < (this.xOffset > 0 ? w - this.xOffset : w))) {
+					if((k >= (this.xOffset < 0 ? -this.xOffset : 0)) && (k < (this.xOffset > 0 ? w - this.xOffset - 1 : w))) {
 
 						glcm.inc(this.imagePosterized.get(k, l), this.imagePosterized.get(k + this.xOffset, l + this.yOffset));
+						
 						if(this.symmetricOffset)
 							glcm.inc(this.imagePosterized.get(k + this.xOffset, l + this.yOffset), this.imagePosterized.get(k, l));
 
