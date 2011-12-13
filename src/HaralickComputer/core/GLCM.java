@@ -15,7 +15,8 @@ public class GLCM {
 	
 	private float _mu_x, _mu_y, _s_x, _s_y;
 	
-	private float _angularSecondMoment, _contrast, _autoCorrelation, _correlation, _haralickCorrelation, _entropy,
+	private float _angularSecondMoment, _contrast, _autoCorrelation, _correlation, 
+		_sumOfSquaresVariance, _sumAverage, _entropy,
 		_inverseDifferenceMoment, _clusterShade,
 		_clusterProminence, _haralickCorrelationITK;
 	
@@ -24,7 +25,8 @@ public class GLCM {
 		Contrast, 
 		AutoCorrelation,
 		Correlation, 
-		Correlation2, 
+		SumOfSquaresVariance,
+		SumAverage,
 		Entropy,
 		InverseDifferenceMoment, 
 		ClusterShade, 
@@ -111,8 +113,9 @@ public class GLCM {
 		double log2 = Math.log(2);
 		
 		_angularSecondMoment = 0; _entropy = 0; _autoCorrelation = 0; _correlation = 0; 
-		_haralickCorrelation = 0; _inverseDifferenceMoment = 0; _contrast = 0; _clusterShade = 0;
-		_clusterProminence = 0; _haralickCorrelationITK = 0;
+		_sumOfSquaresVariance = 0; _inverseDifferenceMoment = 0; _sumAverage = 0; 
+		_contrast = 0; _clusterShade = 0; _clusterProminence = 0; _haralickCorrelationITK = 0;
+		
 
 		for(i = 0 ; i < this._size; i++) {
 			for(j = 0 ; j < this._size; j++) {
@@ -124,12 +127,14 @@ public class GLCM {
 			    this._contrast += (i - j) * (i - j) * f;
 			    this._autoCorrelation += i * j * f;
 			    
+			    this._sumOfSquaresVariance += (i - this._mu_x) * (i - this._mu_x) * f; 
+			    this._inverseDifferenceMoment += f / (1.0 + (i - j) * (i - j) );
+			    this._sumAverage += (i + j) * f;
+			    
 			    this._entropy -= (f > 0.0001) ? f * Math.log(f) / log2 : 0;
 			    
-			    this._inverseDifferenceMoment += f / (1.0 + (i - j) * (i - j) );
-			    
-			    this._clusterShade += Math.pow((i - this._pixelMean) + (j - this._pixelMean), 3) * f;
-			    this._clusterProminence += Math.pow((i - this._pixelMean) + (j - this._pixelMean), 4) * f;
+			    this._clusterShade += Math.pow((i - this._mu_x) + (j - this._mu_y), 3) * f;
+			    this._clusterProminence += Math.pow((i - this._mu_x) + (j - this._mu_y), 4) * f;
 			}
 		}
 		
@@ -290,8 +295,12 @@ public class GLCM {
 			return this._autoCorrelation;
 		case TextureFeatures.Correlation:
 			return this._correlation;
+		case TextureFeatures.SumOfSquaresVariance:
+			return this._sumOfSquaresVariance;
 		case TextureFeatures.InverseDifferenceMoment:
 			return this._inverseDifferenceMoment;
+		case TextureFeatures.SumAverage:
+			return this._sumAverage;
 		case TextureFeatures.Contrast:
 			return this._contrast;
 		case TextureFeatures.ClusterShade:

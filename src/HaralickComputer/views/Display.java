@@ -11,7 +11,6 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.imageio.ImageIO;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -44,7 +43,9 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 	DoubleImagePanel imagesPanel;
 	JMenuItem menuItemOpen, 
 		menuItemDisplayAngularSecondMoment, menuItemDisplayEntropy, 
-		menuItemDisplayAutoCorrelation, menuItemDisplayCorrelation, menuItemDisplayInverseDifferenceMoment, 
+		menuItemDisplayAutoCorrelation, menuItemDisplayCorrelation,
+		menuItemDisplaySumOfSquaresVariance, menuItemDisplayInverseDifferenceMoment,
+		menuItemDisplaySumAverage,
 		menuItemDisplayContrast, menuItemDisplayClusterShade, 
 		menuItemDisplayClusterProminence, menuItemDisplayHaralickCorrelation,
 		menuItemSwitchDisplay,
@@ -219,6 +220,8 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		menuItemDisplayEntropy = new JMenuItem("Display entropy");
 		menuItemDisplayAutoCorrelation = new JMenuItem("Display auto-correlation");
 		menuItemDisplayCorrelation = new JMenuItem("Display correlation");
+		menuItemDisplaySumOfSquaresVariance = new JMenuItem("Display sum of squares variance");
+		menuItemDisplaySumAverage = new JMenuItem("Display sum average");
 		menuItemDisplayInverseDifferenceMoment = new JMenuItem("Display inverse difference moment"); 
 		menuItemDisplayContrast = new JMenuItem("Display contrast");
 		menuItemDisplayClusterShade = new JMenuItem("Display cluster shade"); 
@@ -229,6 +232,8 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		menuDisplay.add(menuItemDisplayEntropy);
 		menuDisplay.add(menuItemDisplayAutoCorrelation);
 		menuDisplay.add(menuItemDisplayCorrelation);
+		menuDisplay.add(menuItemDisplaySumOfSquaresVariance);
+		menuDisplay.add(menuItemDisplaySumAverage);
 		menuDisplay.add(menuItemDisplayInverseDifferenceMoment);
 		menuDisplay.add(menuItemDisplayContrast);
 		menuDisplay.add(menuItemDisplayClusterShade);
@@ -239,6 +244,8 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		menuItemDisplayEntropy.addActionListener(this);
 		menuItemDisplayAutoCorrelation.addActionListener(this);
 		menuItemDisplayCorrelation.addActionListener(this);
+		menuItemDisplaySumOfSquaresVariance.addActionListener(this);
+		menuItemDisplaySumAverage.addActionListener(this);
 		menuItemDisplayInverseDifferenceMoment.addActionListener(this);
 		menuItemDisplayContrast.addActionListener(this);
 		menuItemDisplayClusterShade.addActionListener(this);
@@ -285,8 +292,12 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.AutoCorrelation));
 		} else if(source == menuItemDisplayCorrelation) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.Correlation));
+		} else if(source == menuItemDisplaySumOfSquaresVariance) {
+			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.SumOfSquaresVariance));
 		} else if(source == menuItemDisplayInverseDifferenceMoment) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.InverseDifferenceMoment));
+		} else if(source == menuItemDisplaySumAverage) {
+			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.SumAverage));
 		} else if(source == menuItemDisplayContrast) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.Contrast));
 		} else if(source == menuItemDisplayClusterShade) {

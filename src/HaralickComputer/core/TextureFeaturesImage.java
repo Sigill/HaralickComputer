@@ -31,7 +31,9 @@ public class TextureFeaturesImage {
 		set(x, y, TextureFeatures.Entropy, glcm.getFeature(TextureFeatures.Entropy));
 		set(x, y, TextureFeatures.AutoCorrelation, glcm.getFeature(TextureFeatures.AutoCorrelation));
 		set(x, y, TextureFeatures.Correlation, glcm.getFeature(TextureFeatures.Correlation));
+		set(x, y, TextureFeatures.SumOfSquaresVariance, glcm.getFeature(TextureFeatures.SumOfSquaresVariance));
 		set(x, y, TextureFeatures.InverseDifferenceMoment, glcm.getFeature(TextureFeatures.InverseDifferenceMoment));
+		set(x, y, TextureFeatures.SumAverage, glcm.getFeature(TextureFeatures.SumAverage));
 		set(x, y, TextureFeatures.Contrast, glcm.getFeature(TextureFeatures.Contrast));
 		set(x, y, TextureFeatures.ClusterShade, glcm.getFeature(TextureFeatures.ClusterShade));
 		set(x, y, TextureFeatures.ClusterProminence, glcm.getFeature(TextureFeatures.ClusterProminence));
