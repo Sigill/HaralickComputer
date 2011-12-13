@@ -44,7 +44,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 	DoubleImagePanel imagesPanel;
 	JMenuItem menuItemOpen, 
 		menuItemDisplayAngularSecondMoment, menuItemDisplayEntropy, 
-		menuItemDisplayCorrelation, menuItemDisplayInverseDifferenceMoment, 
+		menuItemDisplayAutoCorrelation, menuItemDisplayCorrelation, menuItemDisplayInverseDifferenceMoment, 
 		menuItemDisplayContrast, menuItemDisplayClusterShade, 
 		menuItemDisplayClusterProminence, menuItemDisplayHaralickCorrelation,
 		menuItemSwitchDisplay,
@@ -216,7 +216,8 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		menubar.add(menuDisplay);
 		
 		menuItemDisplayAngularSecondMoment = new JMenuItem("Display angular second moment");
-		menuItemDisplayEntropy = new JMenuItem("Display entropy"); 
+		menuItemDisplayEntropy = new JMenuItem("Display entropy");
+		menuItemDisplayAutoCorrelation = new JMenuItem("Display auto-correlation");
 		menuItemDisplayCorrelation = new JMenuItem("Display correlation");
 		menuItemDisplayInverseDifferenceMoment = new JMenuItem("Display inverse difference moment"); 
 		menuItemDisplayContrast = new JMenuItem("Display contrast");
@@ -226,6 +227,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		
 		menuDisplay.add(menuItemDisplayAngularSecondMoment);
 		menuDisplay.add(menuItemDisplayEntropy);
+		menuDisplay.add(menuItemDisplayAutoCorrelation);
 		menuDisplay.add(menuItemDisplayCorrelation);
 		menuDisplay.add(menuItemDisplayInverseDifferenceMoment);
 		menuDisplay.add(menuItemDisplayContrast);
@@ -235,6 +237,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		
 		menuItemDisplayAngularSecondMoment.addActionListener(this);
 		menuItemDisplayEntropy.addActionListener(this);
+		menuItemDisplayAutoCorrelation.addActionListener(this);
 		menuItemDisplayCorrelation.addActionListener(this);
 		menuItemDisplayInverseDifferenceMoment.addActionListener(this);
 		menuItemDisplayContrast.addActionListener(this);
@@ -278,6 +281,8 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.AngularSecondMoment));
 		} else if(source == menuItemDisplayEntropy) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.Entropy));
+		} else if(source == menuItemDisplayAutoCorrelation) {
+			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.AutoCorrelation));
 		} else if(source == menuItemDisplayCorrelation) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.Correlation));
 		} else if(source == menuItemDisplayInverseDifferenceMoment) {
@@ -289,7 +294,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		} else if(source == menuItemDisplayClusterProminence) {
 			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.ClusterProminence));
 		} else if(source == menuItemDisplayHaralickCorrelation) {
-			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.HaralickCorrelation));
+			imagesPanel.setRightImage(tfc.getHaralickImage(TextureFeatures.HaralickCorrelationITK));
 		} else if(source == menuItemSwitchDisplay) {
 			imagesPanel.changeOrientation();
 		} else if (source == btnValidateParameters) {

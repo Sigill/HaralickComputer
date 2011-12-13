@@ -5,13 +5,14 @@ public class TextureFeatures {
 	public final static int 
 		AngularSecondMoment = 0, 
 		Entropy = 1, 
-		Correlation = 2,
-		InverseDifferenceMoment = 3, 
-		Contrast = 4, 
-		ClusterShade = 5, 
-		ClusterProminence = 6,
-		HaralickCorrelation = 7;
+		AutoCorrelation = 2,
+		Correlation = 3,
+		InverseDifferenceMoment = 4, 
+		Contrast = 5,
+		ClusterShade = 6, 
+		ClusterProminence = 7,
+		HaralickCorrelationITK = 8;
 	
-	public final static int _nbFeatures = 8;
+	public final static int _nbFeatures = 9;
 	
 }

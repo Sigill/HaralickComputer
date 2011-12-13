@@ -27,14 +27,15 @@ public class TextureFeaturesImage {
 	}
 	
 	public void setFromGLCM(int x, int y, GLCM glcm) {
-		set(x, y, TextureFeatures.AngularSecondMoment, glcm.get(TextureFeatures.AngularSecondMoment));
-		set(x, y, TextureFeatures.Entropy, glcm.get(TextureFeatures.Entropy));
-		set(x, y, TextureFeatures.Correlation, glcm.get(TextureFeatures.Correlation));
-		set(x, y, TextureFeatures.InverseDifferenceMoment, glcm.get(TextureFeatures.InverseDifferenceMoment));
-		set(x, y, TextureFeatures.Contrast, glcm.get(TextureFeatures.Contrast));
-		set(x, y, TextureFeatures.ClusterShade, glcm.get(TextureFeatures.ClusterShade));
-		set(x, y, TextureFeatures.ClusterProminence, glcm.get(TextureFeatures.ClusterProminence));
-		set(x, y, TextureFeatures.HaralickCorrelation, glcm.get(TextureFeatures.HaralickCorrelation));
+		set(x, y, TextureFeatures.AngularSecondMoment, glcm.getFeature(TextureFeatures.AngularSecondMoment));
+		set(x, y, TextureFeatures.Entropy, glcm.getFeature(TextureFeatures.Entropy));
+		set(x, y, TextureFeatures.AutoCorrelation, glcm.getFeature(TextureFeatures.AutoCorrelation));
+		set(x, y, TextureFeatures.Correlation, glcm.getFeature(TextureFeatures.Correlation));
+		set(x, y, TextureFeatures.InverseDifferenceMoment, glcm.getFeature(TextureFeatures.InverseDifferenceMoment));
+		set(x, y, TextureFeatures.Contrast, glcm.getFeature(TextureFeatures.Contrast));
+		set(x, y, TextureFeatures.ClusterShade, glcm.getFeature(TextureFeatures.ClusterShade));
+		set(x, y, TextureFeatures.ClusterProminence, glcm.getFeature(TextureFeatures.ClusterProminence));
+		set(x, y, TextureFeatures.HaralickCorrelationITK, glcm.getFeature(TextureFeatures.HaralickCorrelationITK));
 	}
 	
 	public BufferedImage toBufferedImage(int feature) {
