@@ -74,13 +74,14 @@ public class TextureFeaturesImage {
 		String s;
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+			writer.write("Id; Features\n");
 			for(j = 0; j < this._height; ++j) {
 				for(i = 0; i < this._width; ++i) {
-					s = "" + this._data[getOffset(i, j, 0)];
+					s = (j * this._width + i) + "; " + "(" + this._data[getOffset(i, j, 0)];
 					for(f = 1; f < TextureFeatures._nbFeatures; ++f) {
-						s += "; " + this._data[getOffset(i, j, f)];
+						s += ", " + this._data[getOffset(i, j, f)];
 					}
-					writer.write(s + "\n");
+					writer.write(s + ")\n");
 				}
 			}
 			
