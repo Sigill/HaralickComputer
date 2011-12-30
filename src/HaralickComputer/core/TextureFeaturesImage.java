@@ -6,6 +6,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Locale;
 
 public class TextureFeaturesImage {
 	private int _width, _height;
@@ -70,18 +75,42 @@ public class TextureFeaturesImage {
 	}
 	
 	public void exportCSV(File file) {
-		int i, j, f;
-		String s;
+		int i, j, f, startOffset, endOffset;
+		float min[] = new float[TextureFeatures._nbFeatures];
+		float max[] = new float[TextureFeatures._nbFeatures];
+		float v, min_f, max_f;
+		NumberFormat formatter = new DecimalFormat("###.#####");
+		DecimalFormatSymbols frenchSymbols = new DecimalFormatSymbols(Locale.FRENCH);
+		frenchSymbols.setDecimalSeparator('.');
+		((DecimalFormat)formatter).setDecimalFormatSymbols(frenchSymbols);
+		ArrayList<String> values = new ArrayList<String>(TextureFeatures._nbFeatures);
+		
+		for(f = 0; f < TextureFeatures._nbFeatures; ++f) {
+			min_f = Float.MAX_VALUE;
+			max_f = Float.MIN_VALUE;
+			startOffset = f * this._width * this._height;
+			endOffset = (f + 1) * (this._width * this._height);
+			for(i = startOffset; i < endOffset; i++) {
+				v = this._data[i];
+				
+				if(v < min_f) min_f = v;
+				if(v > max_f) max_f = v;
+			}
+			min[f] = min_f;
+			max[f] = max_f;
+		}
+		
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 			writer.write("Id; Features\n");
 			for(j = 0; j < this._height; ++j) {
 				for(i = 0; i < this._width; ++i) {
-					s = (j * this._width + i) + "; " + "(" + this._data[getOffset(i, j, 0)];
-					for(f = 1; f < TextureFeatures._nbFeatures; ++f) {
-						s += ", " + this._data[getOffset(i, j, f)];
+					values.clear();
+					for(f = 0; f < TextureFeatures._nbFeatures; ++f) {
+						values.add(formatter.format((this._data[getOffset(i, j, f)] - min[f]) / (max[f] - min[f])));
 					}
-					writer.write(s + ")\n");
+					writer.write((j * this._width + i) + "; (" + Utils.combine(values, ", ") + ")\n");
+					//writer.write((j * this._width + i) + "; " + Utils.combine(values, "; ") + "\n");
 				}
 			}
 			
