@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="jar" name="libGLCM">
+	<description>
+		Tool to compute and visualize Haralick charactéristics of 3D images.
+	</description>
+	
+	<property name="src.dir" location="src" />
+	<property name="generic.dir" location="generic" />
+	
+	<target name="jar" >
+		
+	</target>
+	
+	<macrodef name="generate_generic_array">
+		<attribute name="name" />
+		<attribute name="type" />
+		<sequential>
+			<copy file="${generic.dir}/GenericArray.java.generic" tofile="${src.dir}/glcm/@{name}.java" overwrite="true">
+				<filterset>
+					<filter token="TYPE" value="@{type}" />
+					<filter token="NAME" value="@{name}" />
+				</filterset>
+			</copy>
+		</sequential>
+	</macrodef>
+	
+	<target name="build_generic_files" >
+		<!--<generate_generic_array type="int" name="IntArray"/>-->
+		<!--<generate_generic_array type="double" name="DoubleArray"/>-->
+		<generate_generic_array type="float" name="FloatArray"/>
+		<generate_generic_array type="short" name="ShortArray"/>
+	</target>
+	
+</project>
