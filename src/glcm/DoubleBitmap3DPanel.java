@@ -42,8 +42,6 @@ public class DoubleBitmap3DPanel extends JPanel implements MouseMotionListener {
 		sliderSlice = new JSlider();
 		sliderSlice.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				JSlider sl = (JSlider) e.getSource();
-				System.out.println(sl.getValue());
 				repaint();
 			}
 		});

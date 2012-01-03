@@ -50,7 +50,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 	
 	private GLCM live_GLCM;
 	
-	JFileChooser fc, fc_export;
+	JFileChooser fc2D, fc_export, fc3D;
 	private JLabel lblNumberOfGrayLevels, lblCoocurrenceMatrix, lblXoffset, lblYoffset;
 	private JButton btnValidateParameters;
 	private GLCM_Widget glcm_widget;
@@ -76,7 +76,10 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Container contentPanel = getContentPane();
 		
-		fc = new JFileChooser();
+		fc2D = new JFileChooser();
+		fc2D.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fc3D = new JFileChooser();
+		fc3D.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		fc_export = new JFileChooser();
 		
 		setJMenuBar(buildMenuBar());
@@ -218,10 +221,10 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		
 		menuitemOpen2D = new JMenuItem("Open 2D image");
 		menuitemOpen2D.addActionListener(this);
-		
 		menuFile.add(menuitemOpen2D);
 		
 		menuitemOpen3D = new JMenuItem("Open 3D image");
+		menuitemOpen3D.addActionListener(this);
 		menuFile.add(menuitemOpen3D);
 		
 		JMenu menuDisplay = new JMenu("Display");
@@ -313,9 +316,22 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		Object source = e.getSource();
 		
 		if(source == menuitemOpen2D) {
-			if(fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			if(fc2D.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				try {
-					this.imageSource = Bitmap3D.loadImage2D(fc.getSelectedFile());
+					this.imageSource = Bitmap3D.loadImage2D(fc2D.getSelectedFile());
+					process();
+					imagesPanel.setLeftImage(null);
+					imagesPanel.setRightImage(null);
+					
+					imagesPanel.setLeftImage(this.imageSource);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		} else if(source == menuitemOpen3D) {
+			if(fc3D.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				try {
+					this.imageSource = Bitmap3D.loadImage3D(fc3D.getSelectedFile());
 					process();
 					imagesPanel.setLeftImage(null);
 					imagesPanel.setRightImage(null);
