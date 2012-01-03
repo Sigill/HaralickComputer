@@ -1,31 +1,32 @@
 package HaralickComputer.core;
 
-public class @NAME@ {
-	private int numberOfDimensions;
-	private int[] dimensions;
-	private int[] offsets;
-	private @TYPE@[] data;
+public class NdArray {
+	private int _size;
+	private int[] _dimensions;
+	private int[] _data;
+	private int[] _offsets;
 	
-	public @NAME@(int... dimensions) throws IllegalArgumentException {
-		this.numberOfDimensions = dimensions.length;
-		
-		if(this.numberOfDimensions == 0) {
-			throw new IllegalArgumentException("The dimension of a @NAME@ must be greater than 0.");
+	public NdArray(int... dimensions) /* throws IndexOutOfBoundsException */ {
+		this._size = dimensions.length;
+		/*
+		if(this._size == 0) {
+			throw new IndexOutOfBoundsException("The dimension of a NdArray must be greater than 0.");
 		}
 		
 		if(!validateSize(dimensions)) {
-			throw new IllegalArgumentException("The dimensions of the @NAME@ are invalid.");
+			throw new IndexOutOfBoundsException("The dimensions of the NdArray not legals.");
 		}
+		*/
 		
-		this.dimensions = dimensions;
+		_dimensions = dimensions;
 		
 		computeOffsets();
 		
-		this.data = new @TYPE@[offsets[this.numberOfDimensions]];
+		_data = new int[_offsets[this._size]];
 	}
-	
+	/*
 	private boolean validDimension(int length) {
-		return length == this.numberOfDimensions;
+		return length == this._size;
 	}
 	
 	private boolean validateArray(int min, int... values) {
@@ -44,47 +45,47 @@ public class @NAME@ {
 	private boolean validateCoordinates(int... coordinates) {
 		return validateArray(0, coordinates);
 	}
-	
+	*/
 	
 	private void computeOffsets() {
-		offsets = new int[this.numberOfDimensions + 1];
-		offsets[0] = 1;
+		_offsets = new int[this._size + 1];
+		_offsets[0] = 1;
 		
-		for(int i = 0; i < this.numberOfDimensions; i++) {
-			offsets[i+1] = offsets[i] * dimensions[i];
+		for(int i = 0; i < this._size; i++) {
+			_offsets[i+1] = _offsets[i] * _dimensions[i];
 		}
 	}
 	
 	private int getOffset(int... position) {
 		int offset = 0;
 		for(int i = 0; i < position.length; i++) {
-			offset += position[i] * offsets[i];
+			offset += position[i] * _offsets[i];
 		}
 		
 		return offset;
 	}
 	
-	public @TYPE@ get(int... coordinates) /* throws IndexOutOfBoundsException */ {
+	public int get(int... coordinates) /* throws IndexOutOfBoundsException */ {
 		/*
 		if(!( validDimension(coordinates.length) && validateCoordinates(coordinates) )) {
 			throw new IndexOutOfBoundsException("Invalid coordinates.");
 		}
 		*/
 		
-		return this.data[getOffset(coordinates)];
+		return _data[getOffset(coordinates)];
 	}
 	
-	public void set(@TYPE@ value, int... coordinates) /* throws IndexOutOfBoundsException */ {
+	public void set(int value, int... coordinates) /* throws IndexOutOfBoundsException */ {
 		/*
 		if(!( validDimension(coordinates.length) && validateCoordinates(coordinates) )) {
 			throw new IndexOutOfBoundsException("Invalid coordinates.");
 		}
 		*/
 		
-		this.data[getOffset(coordinates)] = value;
+		_data[getOffset(coordinates)] = value;
 	}
 	
-	public @NAME@ extractRegion(int... coordinates) /* throws IndexOutOfBoundsException */ {
+	public NdArray extractRegion(int... coordinates) /* throws IndexOutOfBoundsException */ {
 		/*
 		if((coordinates.length % 2 != 0)) {
 			throw new IndexOutOfBoundsException("Invalid dimensions.");
@@ -95,12 +96,12 @@ public class @NAME@ {
 		}
 		*/
 		
-		int[] begin = new int[this.numberOfDimensions];
-		int[] end = new int[this.numberOfDimensions];
+		int[] begin = new int[this._size];
+		int[] end = new int[this._size];
 		
-		for(int i = 0; i < this.numberOfDimensions; i++) {
+		for(int i = 0; i < this._size; i++) {
 			begin[i] = coordinates[i];
-			end[i] = coordinates[this.numberOfDimensions + i];
+			end[i] = coordinates[this._size + i];
 		}
 		
 		/*
@@ -112,16 +113,8 @@ public class @NAME@ {
 		}
 		*/
 		
-		@NAME@ roi = new @NAME@();
+		NdArray roi = new NdArray();
 		
 		return roi;
-	}
-	
-	public static void main(String[] args) {
-		@NAME@ a = new @NAME@(4, 4, 4, 4);
-		
-		for(int i = 0; i < a.numberOfDimensions; ++i) {
-			System.out.println(a.offsets[i]);
-		}
 	}
 }
