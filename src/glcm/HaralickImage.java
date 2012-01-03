@@ -8,9 +8,9 @@ public class HaralickImage {
 		this.dimensions = dimensions;
 		
 		image = new FloatArray[HaralickComputer.numberOfFeatures];
-		for(int i = 0; i < HaralickComputer.numberOfFeatures; ++i) {
-			this.image[i] = new FloatArray(dimensions);
-			this.image[i].allocate();
+		for(int f = 0; f < HaralickComputer.numberOfFeatures; ++f) {
+			this.image[f] = new FloatArray(dimensions);
+			this.image[f].allocate();
 		}
 	}
 	

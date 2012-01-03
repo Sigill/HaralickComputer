@@ -51,6 +51,11 @@ public class DoubleBitmap3DPanel extends JPanel implements MouseMotionListener {
 		add(panelImage, BorderLayout.CENTER);
 	}
 	
+	public void clear() {
+		this.leftSlices = null;
+		this.rightSlices = null;
+	}
+	
 	private static BufferedImage[] slice(Bitmap3D image) {
 		BufferedImage[] slices = new BufferedImage[image.dimensions[2]];
 		

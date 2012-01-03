@@ -47,9 +47,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		menuItemSwitchDisplay,
 		menuItemExportCSV,
 		menuitemOpen3D;
-	
-	private GLCM live_GLCM;
-	
+		
 	JFileChooser fc2D, fc_export, fc3D;
 	private JLabel lblNumberOfGrayLevels, lblCoocurrenceMatrix, lblXoffset, lblYoffset;
 	private JButton btnValidateParameters;
@@ -58,17 +56,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 	private JSpinner spinner_numberOfGrayLevels, spinner_radiusOfWindow, spinner_y_offset, spinner_x_offset;
 	private JCheckBox checkboxSymmetricOffset;
 	
-	public final static int DEFAULT_X_OFFSET = 1;
-	public final static int DEFAULT_Y_OFFSET = 0;
-	public final static int DEFAULT_NUMBER_OF_GRAYLEVELS = 16;
-	public final static int DEFAULT_WINDOW_RADIUS = 2;
-	public final static boolean DEFAULT_SYMMETRIC_OFFSET = false;
-	
-	private Bitmap3D imageSource = null, imagePosterized = null;
-	private LocalHaralickOperator haraOp;
-	private Bitmap3D[] haralickImages;
-	private Bitmap3D.NeighbourhoodIterator nit;
-	private GLCMOperator glcmOp;
+	private Controller controller = new Controller();
 		
 	public Display() {
 		super("Haralick 3D Computer");
@@ -108,7 +96,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		gbl_sidebar.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		sidebar.setLayout(gbl_sidebar);
 		
-		spinner_numberOfGrayLevels = new JSpinner(new SpinnerNumberModel(DEFAULT_NUMBER_OF_GRAYLEVELS, 0, 255, 1));
+		spinner_numberOfGrayLevels = new JSpinner(new SpinnerNumberModel(Controller.DEFAULT_NUMBER_OF_GRAYLEVELS, 0, 255, 1));
 		spinner_numberOfGrayLevels.addChangeListener(this);
 		
 		lblCoocurrenceMatrix = new JLabel("Coocurrence matrix");
@@ -151,7 +139,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		gbc_lblSizeOfWindow.gridy = 4;
 		sidebar.add(lblSizeOfWindow, gbc_lblSizeOfWindow);
 		
-		spinner_radiusOfWindow = new JSpinner(new SpinnerNumberModel(DEFAULT_WINDOW_RADIUS, 1, null, 1));
+		spinner_radiusOfWindow = new JSpinner(new SpinnerNumberModel(Controller.DEFAULT_WINDOW_RADIUS, 1, null, 1));
 		GridBagConstraints gbc_spinner_radiusOfWindow = new GridBagConstraints();
 		gbc_spinner_radiusOfWindow.fill = GridBagConstraints.HORIZONTAL;
 		gbc_spinner_radiusOfWindow.insets = new Insets(0, 0, 5, 0);
@@ -171,7 +159,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		sidebar.add(lblXoffset, gbc_lblXoffset);
 		
 		spinner_x_offset = new JSpinner();
-		spinner_x_offset.setModel(new SpinnerNumberModel(DEFAULT_X_OFFSET, null, null, 1));
+		spinner_x_offset.setModel(new SpinnerNumberModel(Controller.DEFAULT_X_OFFSET, null, null, 1));
 		GridBagConstraints gbc_spinner_x_offset = new GridBagConstraints();
 		gbc_spinner_x_offset.fill = GridBagConstraints.HORIZONTAL;
 		gbc_spinner_x_offset.insets = new Insets(0, 0, 5, 0);
@@ -188,7 +176,7 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		sidebar.add(lblYoffset, gbc_lblYoffset);
 		
 		spinner_y_offset = new JSpinner();
-		spinner_y_offset.setModel(new SpinnerNumberModel(DEFAULT_Y_OFFSET, null, null, 1));
+		spinner_y_offset.setModel(new SpinnerNumberModel(Controller.DEFAULT_Y_OFFSET, null, null, 1));
 		GridBagConstraints gbc_spinner_y_offset = new GridBagConstraints();
 		gbc_spinner_y_offset.fill = GridBagConstraints.HORIZONTAL;
 		gbc_spinner_y_offset.insets = new Insets(0, 0, 5, 0);
@@ -213,6 +201,13 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		return sidebar;
 	}
 	
+	private JMenuItem addItemDisplay(String text, JMenu menu) {
+		JMenuItem item = new JMenuItem(text);
+		item.addActionListener(this);
+		menu.add(item);
+		return item;
+	}
+	
 	private JMenuBar buildMenuBar() {
 		JMenuBar menubar = new JMenuBar();
 		
@@ -230,85 +225,28 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		JMenu menuDisplay = new JMenu("Display");
 		menubar.add(menuDisplay);
 		
-		menuItemDisplayAngularSecondMoment = new JMenuItem("Display angular second moment");
-		menuItemDisplayEntropy = new JMenuItem("Display entropy");
-		menuItemDisplayAutoCorrelation = new JMenuItem("Display auto-correlation");
-		menuItemDisplayCorrelation = new JMenuItem("Display correlation");
-		menuItemDisplaySumOfSquaresVariance = new JMenuItem("Display sum of squares variance");
-		menuItemDisplaySumAverage = new JMenuItem("Display sum average");
-		menuItemDisplayInverseDifferenceMoment = new JMenuItem("Display inverse difference moment"); 
-		menuItemDisplayContrast = new JMenuItem("Display contrast");
-		menuItemDisplayClusterShade = new JMenuItem("Display cluster shade"); 
-		menuItemDisplayClusterProminence = new JMenuItem("Display cluster prominence");
-		menuItemDisplayHaralickCorrelation = new JMenuItem("Display haralick correlation");
-		
-		menuDisplay.add(menuItemDisplayAngularSecondMoment);
-		menuDisplay.add(menuItemDisplayEntropy);
-		menuDisplay.add(menuItemDisplayAutoCorrelation);
-		menuDisplay.add(menuItemDisplayCorrelation);
-		menuDisplay.add(menuItemDisplaySumOfSquaresVariance);
-		menuDisplay.add(menuItemDisplaySumAverage);
-		menuDisplay.add(menuItemDisplayInverseDifferenceMoment);
-		menuDisplay.add(menuItemDisplayContrast);
-		menuDisplay.add(menuItemDisplayClusterShade);
-		menuDisplay.add(menuItemDisplayClusterProminence);
-		menuDisplay.add(menuItemDisplayHaralickCorrelation);
-		
-		menuItemDisplayAngularSecondMoment.addActionListener(this);
-		menuItemDisplayEntropy.addActionListener(this);
-		menuItemDisplayAutoCorrelation.addActionListener(this);
-		menuItemDisplayCorrelation.addActionListener(this);
-		menuItemDisplaySumOfSquaresVariance.addActionListener(this);
-		menuItemDisplaySumAverage.addActionListener(this);
-		menuItemDisplayInverseDifferenceMoment.addActionListener(this);
-		menuItemDisplayContrast.addActionListener(this);
-		menuItemDisplayClusterShade.addActionListener(this);
-		menuItemDisplayClusterProminence.addActionListener(this);
-		menuItemDisplayHaralickCorrelation.addActionListener(this);
+		menuItemDisplayAngularSecondMoment = addItemDisplay("Display angular second moment", menuDisplay);
+		menuItemDisplayEntropy = addItemDisplay("Display entropy", menuDisplay);
+		menuItemDisplayAutoCorrelation = addItemDisplay("Display auto-correlation", menuDisplay);
+		menuItemDisplayCorrelation = addItemDisplay("Display correlation", menuDisplay);
+		menuItemDisplaySumOfSquaresVariance = addItemDisplay("Display sum of squares variance", menuDisplay);
+		menuItemDisplaySumAverage = addItemDisplay("Display sum average", menuDisplay);
+		menuItemDisplayInverseDifferenceMoment = addItemDisplay("Display inverse difference moment", menuDisplay); 
+		menuItemDisplayContrast = addItemDisplay("Display contrast", menuDisplay);
+		menuItemDisplayClusterShade = addItemDisplay("Display cluster shade", menuDisplay); 
+		menuItemDisplayClusterProminence = addItemDisplay("Display cluster prominence", menuDisplay);
+		menuItemDisplayHaralickCorrelation = addItemDisplay("Display haralick correlation", menuDisplay);
 		
 		menuDisplay.addSeparator();
 		
-		menuItemSwitchDisplay = new JMenuItem("Switch display");
-		menuDisplay.add(menuItemSwitchDisplay);
-		menuItemSwitchDisplay.addActionListener(this);
+		menuItemSwitchDisplay = addItemDisplay("Switch display", menuDisplay);
 		
 		JMenu menuExport = new JMenu("Export");
 		menubar.add(menuExport);
 		
-		menuItemExportCSV = new JMenuItem("Export CSV");
-		menuExport.add(menuItemExportCSV);
-		menuItemExportCSV.addActionListener(this);
+		menuItemExportCSV = addItemDisplay("Export CSV", menuExport);
 		
 		return menubar;
-	}
-	
-	private void process() {
-		this.imagePosterized = new Bitmap3D(this.imageSource);
-		this.imagePosterized.posterize((Integer)this.spinner_numberOfGrayLevels.getValue());
-		
-		this.glcmOp = new GLCMOperator(this.imagePosterized);
-		this.glcmOp.setSize((Integer)this.spinner_numberOfGrayLevels.getValue());
-		this.glcmOp.setOffset(
-				this.checkboxSymmetricOffset.isSelected(), 
-				(Integer)this.spinner_x_offset.getValue(), 
-				(Integer)this.spinner_y_offset.getValue(), 
-				0);
-		
-		Bitmap3D.ImageIterator it = this.imagePosterized.new ImageIterator();
-		it.start();
-		
-		haraOp = new LocalHaralickOperator(this.imagePosterized);
-		haraOp.setNumberOfGraylevels((Integer)this.spinner_numberOfGrayLevels.getValue());
-		haraOp.setRadius((Integer)this.spinner_radiusOfWindow.getValue(), (Integer)this.spinner_radiusOfWindow.getValue(), 1);
-		haraOp.setOffset(this.checkboxSymmetricOffset.isSelected(), (Integer)this.spinner_x_offset.getValue(), (Integer)this.spinner_y_offset.getValue(), 0);
-		haraOp.compute(it);
-		
-		this.haralickImages = new Bitmap3D[HaralickComputer.numberOfFeatures];
-		for(int i = 0; i < HaralickComputer.numberOfFeatures; ++i) {
-			this.haralickImages[i] = new Bitmap3D(haraOp.getFeature(i));
-		}
-		
-		nit = this.imageSource.new NeighbourhoodIterator((Integer)this.spinner_radiusOfWindow.getValue());
 	}
 
 	@Override
@@ -318,12 +256,11 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		if(source == menuitemOpen2D) {
 			if(fc2D.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				try {
-					this.imageSource = Bitmap3D.loadImage2D(fc2D.getSelectedFile());
-					process();
-					imagesPanel.setLeftImage(null);
-					imagesPanel.setRightImage(null);
+					this.controller.imageSource = Bitmap3D.loadImage2D(fc2D.getSelectedFile());
+					this.controller.process();
+					imagesPanel.clear();
 					
-					imagesPanel.setLeftImage(this.imageSource);
+					imagesPanel.setLeftImage(this.controller.imageSource);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -331,48 +268,52 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		} else if(source == menuitemOpen3D) {
 			if(fc3D.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				try {
-					this.imageSource = Bitmap3D.loadImage3D(fc3D.getSelectedFile());
-					process();
-					imagesPanel.setLeftImage(null);
-					imagesPanel.setRightImage(null);
+					this.controller.imageSource = Bitmap3D.loadImage3D(fc3D.getSelectedFile());
+					this.controller.process();
+					imagesPanel.clear();
 					
-					imagesPanel.setLeftImage(this.imageSource);
+					imagesPanel.setLeftImage(this.controller.imageSource);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
 			}
 		} else if(source == menuItemDisplayAngularSecondMoment) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.AngularSecondMoment]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.AngularSecondMoment]);
 		} else if(source == menuItemDisplayEntropy) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.Entropy]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.Entropy]);
 		} else if(source == menuItemDisplayAutoCorrelation) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.AutoCorrelation]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.AutoCorrelation]);
 		} else if(source == menuItemDisplayCorrelation) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.Correlation]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.Correlation]);
 		} else if(source == menuItemDisplaySumOfSquaresVariance) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.SumOfSquaresVariance]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.SumOfSquaresVariance]);
 		} else if(source == menuItemDisplayInverseDifferenceMoment) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.InverseDifferenceMoment]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.InverseDifferenceMoment]);
 		} else if(source == menuItemDisplaySumAverage) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.SumAverage]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.SumAverage]);
 		} else if(source == menuItemDisplayContrast) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.Contrast]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.Contrast]);
 		} else if(source == menuItemDisplayClusterShade) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.ClusterShade]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.ClusterShade]);
 		} else if(source == menuItemDisplayClusterProminence) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.ClusterProminence]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.ClusterProminence]);
 		} else if(source == menuItemDisplayHaralickCorrelation) {
-			imagesPanel.setRightImage(this.haralickImages[HaralickComputer.HaralickCorrelationITK]);
+			imagesPanel.setRightImage(this.controller.haralickImages[HaralickComputer.HaralickCorrelationITK]);
 		} else if(source == menuItemSwitchDisplay) {
 			imagesPanel.changeOrientation();
 		} else if (source == btnValidateParameters) {
-			process();
-		} /*else if (source == menuItemExportCSV) {
+			this.controller.numberOfGraylevels = (Integer)this.spinner_numberOfGrayLevels.getValue();
+			this.controller.windowRadius = (Integer)this.spinner_radiusOfWindow.getValue();
+			this.controller.symmetricOffset = this.checkboxSymmetricOffset.isSelected();
+			this.controller.xOffset = (Integer)this.spinner_x_offset.getValue();
+			this.controller.yOffset = (Integer)this.spinner_y_offset.getValue();
+			this.controller.process();
+		} else if (source == menuItemExportCSV) {
 			if(fc_export.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-				this.tfc.exportCSV(fc_export.getSelectedFile()); 
+				this.controller.exportCSV(fc_export.getSelectedFile());
 			}
 		}
-		*/
+		
 		update(getGraphics());
 	}
 
@@ -385,15 +326,19 @@ public class Display extends JFrame implements ActionListener, ChangeListener, O
 		if(o == this.imagesPanel_mouse_observable) {
 			Point pos = this.imagesPanel.getMousePositionOnImage();
 			
-			if(!(pos.x >= 0 && pos.y >= 0 && pos.x < this.imageSource.dimensions[0] && pos.y < this.imageSource.dimensions[1])) {
+			if(!(
+					pos.x >= 0 && 
+					pos.y >= 0 && 
+					pos.x < this.controller.imageSource.dimensions[0] && 
+					pos.y < this.controller.imageSource.dimensions[1])) {
 				return;
 			}
 			
-			this.nit.setCenterPixel(pos.x, pos.y, this.imagesPanel.getSliceNumber());
-			this.glcmOp.resetGLCM();
-			this.glcmOp.compute(this.nit);
+			this.controller.nit.setCenterPixel(pos.x, pos.y, this.imagesPanel.getSliceNumber());
+			this.controller.glcmOp.resetGLCM();
+			this.controller.glcmOp.compute(this.controller.nit);
 			
-			this.glcm_widget.setGLCM(this.glcmOp.getGLCM());
+			this.glcm_widget.setGLCM(this.controller.glcmOp.getGLCM());
 			this.glcm_widget.repaint();
 		}
 	}
