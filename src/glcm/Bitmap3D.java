@@ -6,6 +6,7 @@ import java.awt.image.ColorConvertOp;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -49,6 +50,8 @@ public class Bitmap3D extends ShortArray {
 				return name.toLowerCase().endsWith(".bmp");
 			}
 		});
+		
+		Arrays.sort(slices);
 		
 		BufferedImage bi;
 		try {
